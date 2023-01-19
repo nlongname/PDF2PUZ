@@ -7,6 +7,8 @@ import os
 import numpy as np
 import pprint as pp
 
+import grid
+
 full = True
 def find_pdfs(filepath=None):
     if filepath == None:
@@ -20,7 +22,7 @@ def find_pdfs(filepath=None):
             pdfs.append(name)
     return(pdfs)  # for now I won't include the folder, but I might need to
 
-def grid_from_pic(filename, gridsize = (15, 15)):
+def grid_from_pdf(filename, gridsize = (15, 15)):
     if filename[-4:] == '.pdf':
         filename = filename[:-4]
     dpi = 200
@@ -68,6 +70,7 @@ def grid_from_pic(filename, gridsize = (15, 15)):
     widths = sorted(widths.keys())
     # I think this initial guess is the core problem that's leading to chaotic outcomes for different DPI/a-values
     # TODO: use initial guess based on domain knowledge of crosswords, not presumably-messy data
+    print(pic.size, dpi, gridsize)
     guess = round(pic.size[1]/3/dpi/gridsize[1] + pic.size[0]/2.3/dpi/2/gridsize[0])
     # guess = min([widths[i + 1] - widths[i] for i in range(len(widths) - 1) if
     #              widths[i + 1] - widths[i] > 2 * a])  # not sure about this 2*a
@@ -140,11 +143,9 @@ def grid_from_pic(filename, gridsize = (15, 15)):
     x_size = max(black_squares, key=lambda x: x[0])[0] + 1
     y_size = max(black_squares, key=lambda x: x[1])[1] + 1
 
-    # TODO: check if full rows or columns are all dots, which seems to happen at low DPI; if so remove them and re-do sizes
-
     print(x_size, y_size)
     print(black_squares)
-
+    # TODO: clean this up, really shouldn't need to transpose at all
     template = ['X' * x_size for y in range(y_size)]
     for bs in black_squares:
         template[bs[1]] = template[bs[1]][:bs[0]] + '.' + template[bs[1]][bs[0] + 1:]
@@ -160,15 +161,25 @@ def grid_from_pic(filename, gridsize = (15, 15)):
         transpose[bs[0]] = transpose[bs[0]][:bs[1]] + '.' + transpose[bs[0]][bs[1] + 1:]
     across = sum(l.count('.x') + l.count('.X') + (1 if l[0] != '.' else 0) for l in transpose)
     pp.pprint(transpose)
+    # TODO: crossword-specific integrity check: check symmetry, check size compared to expected, etc.
+    # (possibly combined) check if full rows or columns are all dots, which seems to happen at low DPI;
+    # if so remove them and re-do sizes
+    # probably separate these each out so it's easy to re-do the square-size guess if it's not fixable
+    return(transpose)
 
-    with open(f'{filename}_puz.txt', 'w') as f:
+def write_to_txt(name, grid):
+    clue_numbers = get_clue_numbers(grid)
+    across_len = len(clue_numbers['across'])
+    down_len = len(clue_numbers['down'])
+    with open(f'{name}_puz.txt', 'w') as f:
         f.write(
             f'<ACROSS PUZZLE V2>\n<TITLE>\n{filename}\n<AUTHOR>\n\n<COPYRIGHT>\n\n<SIZE>\n{x_size}x{y_size}\n<GRID>\n')
-        for line in transpose:
+        for line in grid:
             f.writelines(line)
             f.write('\n')
         f.write('<REBUS>\nMARK;\n<ACROSS>\n')
-        f.write('-\n' * across)
+        f.write('-\n' * across_len)
         f.write('<DOWN>\n')
-        f.write('-\n' * down)
+        f.write('-\n' * down_len)
         f.write('<NOTEPAD>\n')
+    return
