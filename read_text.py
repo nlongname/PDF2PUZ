@@ -19,7 +19,7 @@ def read(filename: str):
 def extract_clues(raw: str, clues: dict):
 	print(raw)
 	indices = [None]
-	num=1
+	num = 1
 	numbers_at = {}
 	while indices:
 		indices = [i.start() for i in re.finditer(str(num), raw)]
@@ -28,7 +28,7 @@ def extract_clues(raw: str, clues: dict):
 		num += 1
 	to_delete = []
 	for i in sorted(numbers_at.keys()):
-		if len(numbers_at[i])>1:
+		if len(numbers_at[i]) > 1:
 			to_delete.append(i+1)  # e.g. we find 2 and 23 at an index? we're going to find 3 at the next index
 			numbers_at[i] = [max(numbers_at[i])]  # and we want 23 not 2 here
 	numbers_at = {k: v[0] for k, v in numbers_at.items() if k not in to_delete}
@@ -80,7 +80,7 @@ def extract_clues(raw: str, clues: dict):
 					elif clues[name][clues[name].index(cumulative_list[j][0])-1] not in [pair[0] for pair in cumulative_list[:j]] \
 						or clues[name][clues[name].index(cumulative_list[j][0])+1] not in [pair[0] for pair in cumulative_list[j+1:]]:
 						bogies.append(j)
-				if bogies == []:
+				if not bogies:
 					break
 				cumulative_list = [pair for i, pair in enumerate(cumulative_list) if i not in bogies]
 		if len(cumulative_list) > len(clues[name]):

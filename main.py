@@ -1,17 +1,19 @@
 # Import libraries
 from PIL import Image
-#import pytesseract
-#import sys
+# import pytesseract
+# import sys
 from pdf2image import convert_from_path
 import os
 import numpy as np
 import pprint as pp
 
-import grid
+from grid import *
 
 full = True
+
+
 def find_pdfs(filepath=None):
-    if filepath == None:
+    if not filepath:
         filepath = os.getcwd()
     file_list = os.listdir(filepath)
     pdfs = []
@@ -20,14 +22,16 @@ def find_pdfs(filepath=None):
         extension = file[-4:]
         if extension == '.pdf':
             pdfs.append(name)
-    return(pdfs)  # for now I won't include the folder, but I might need to
+    return pdfs  # for now I won't include the folder, but I might need to
 
-def grid_from_pdf(filename, gridsize = (15, 15)):
+
+def grid_from_pdf(filename, gridsize=(15, 15)):
     if filename[-4:] == '.pdf':
         filename = filename[:-4]
     dpi = 200
     pic = convert_from_path(filename, dpi=dpi, fmt="png")[0]  # hopefully PNG will be more consistent than JPG
-    # TODO: dynamically change DPI. 200 works the best (but breaks on supermega), 50 is way faster but leaves artifacts (DICT, supermega)
+    # TODO: dynamically change DPI. 200 works the best (but breaks on supermega),
+    #  50 is way faster but leaves artifacts (DICT, supermega)
     pic.save(f"{filename}.png", 'PNG')
     # OCR for clues
     #        outfile = f"{name}.txt"
@@ -105,8 +109,8 @@ def grid_from_pdf(filename, gridsize = (15, 15)):
     for r in ranges:
         temp = []
         for d in ranges[r]:
-            l = d[1] - d[0]
-            if l > guess * .75 and abs(l / guess - round(l / guess)) < .2:
+            length = d[1] - d[0]
+            if length > guess * .75 and abs(length / guess - round(length / guess)) < .2:
                 temp.append(d)
         ranges[r] = temp
     ranges = {y: ranges[y] for y in ranges if ranges[y] != []}
@@ -140,13 +144,13 @@ def grid_from_pdf(filename, gridsize = (15, 15)):
                                                                                       j) in black_square_counts else 1
     offset = -min(black_squares, key=lambda y: y[1])[1]
     black_squares = {(y[0], y[1] + offset) for y in black_squares}
-    x_size = max(black_squares, key=lambda x: x[0])[0] + 1
-    y_size = max(black_squares, key=lambda x: x[1])[1] + 1
+    x_size = max(black_squares, key=lambda z: z[0])[0] + 1
+    y_size = max(black_squares, key=lambda z: z[1])[1] + 1
 
     print(x_size, y_size)
     print(black_squares)
     # TODO: clean this up, really shouldn't need to transpose at all
-    template = ['X' * x_size for y in range(y_size)]
+    template = ['X' * x_size for _ in range(y_size)]
     for bs in black_squares:
         template[bs[1]] = template[bs[1]][:bs[0]] + '.' + template[bs[1]][bs[0] + 1:]
     pp.pprint(template)
@@ -154,26 +158,30 @@ def grid_from_pdf(filename, gridsize = (15, 15)):
     # words will be in the form '...XXX...XXX...XXX...', so every '.X' indicates a new word
     # with an extra word if the first character is a letter rather than '.'
     # note: I am not generating a solution so all letters are coded 'x' or 'X'
-    down = sum(l.count('.x') + l.count('.X') + (1 if l[0] != '.' else 0) for l in template)
 
-    transpose = ['X' * y_size for y in range(x_size)]
+    # down = sum(l.count('.x') + l.count('.X') + (1 if l[0] != '.' else 0) for l in template)
+
+    transpose = ['X' * y_size for _ in range(x_size)]
     for bs in black_squares:
         transpose[bs[0]] = transpose[bs[0]][:bs[1]] + '.' + transpose[bs[0]][bs[1] + 1:]
-    across = sum(l.count('.x') + l.count('.X') + (1 if l[0] != '.' else 0) for l in transpose)
+    # across = sum(l.count('.x') + l.count('.X') + (1 if l[0] != '.' else 0) for l in transpose)
     pp.pprint(transpose)
     # TODO: crossword-specific integrity check: check symmetry, check size compared to expected, etc.
     # (possibly combined) check if full rows or columns are all dots, which seems to happen at low DPI;
     # if so remove them and re-do sizes
     # probably separate these each out so it's easy to re-do the square-size guess if it's not fixable
-    return(transpose)
+    return transpose
+
 
 def write_to_txt(name, grid):
+    x_size = len(grid[0])
+    y_size = len(grid)
     clue_numbers = get_clue_numbers(grid)
     across_len = len(clue_numbers['across'])
     down_len = len(clue_numbers['down'])
     with open(f'{name}_puz.txt', 'w') as f:
         f.write(
-            f'<ACROSS PUZZLE V2>\n<TITLE>\n{filename}\n<AUTHOR>\n\n<COPYRIGHT>\n\n<SIZE>\n{x_size}x{y_size}\n<GRID>\n')
+            f'<ACROSS PUZZLE V2>\n<TITLE>\n{name}\n<AUTHOR>\n\n<COPYRIGHT>\n\n<SIZE>\n{x_size}x{y_size}\n<GRID>\n')
         for line in grid:
             f.writelines(line)
             f.write('\n')

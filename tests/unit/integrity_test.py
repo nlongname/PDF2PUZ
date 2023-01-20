@@ -49,6 +49,7 @@ class IntegrityTest(TestCase):
         with open('supermegagrid.txt', 'r+') as f:
             grid = [line.strip('\n') for line in f.readlines()]
         self.assertEqual(expected, clean_edges(grid))
+
     def test_clean_edges_with_size(self):
         # NYT Mini 1/19/23
         input_grid = ['..XXX',
@@ -57,6 +58,5 @@ class IntegrityTest(TestCase):
                       'XXXXX',
                       'XXXXX']
         expected = (input_grid, None)
-        self.assertEqual(clean_edges(input_grid, (5,5)), expected)
-        # I think symmetry should come before this step,
-        # so I need to do that before I go any further
+        self.assertEqual(clean_edges(input_grid, (5, 5)), expected)
+        # I think symmetry should come before this step, so I need to do that before I go any further
