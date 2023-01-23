@@ -10,57 +10,57 @@ class IntegrityTest(TestCase):
                      'XXXXX',
                      'XXXXX',
                      'XXXXX']
-        self.assertEqual(check_rotational(mini_grid), None)
-        self.assertEqual(check_reflection(mini_grid), None)
-        self.assertEqual(check_diagonal(mini_grid), mini_grid)
+        self.assertEqual(None, check_rotational(mini_grid))
+        self.assertEqual(None, check_reflection(mini_grid))
+        self.assertEqual(mini_grid, check_diagonal(mini_grid))
         mini_grid = ['XXX..',  # checks other diagonal
                      'XXXX.',
                      'XXXXX',
                      'XXXXX',
                      '.XXXX']
-        self.assertEqual(check_rotational(mini_grid), None)
-        self.assertEqual(check_reflection(mini_grid), None)
-        self.assertEqual(check_diagonal(mini_grid), mini_grid)
+        self.assertEqual(None, check_rotational(mini_grid))
+        self.assertEqual(None, check_reflection(mini_grid))
+        self.assertEqual(mini_grid, check_diagonal(mini_grid))
         mini_grid = ['..X..',
                      '.XXX.',
                      'XXXXX',
                      'XXXXX',
                      '.XXX.']
-        self.assertEqual(check_rotational(mini_grid), None)
-        self.assertEqual(check_reflection(mini_grid), mini_grid)
-        self.assertEqual(check_diagonal(mini_grid), None)
+        self.assertEqual(None, check_rotational(mini_grid))
+        self.assertEqual(mini_grid, check_reflection(mini_grid))
+        self.assertEqual(None, check_diagonal(mini_grid))
         mini_grid = ['..XX.',
                      '.XXXX',
                      'XXXXX',
                      '.XXXX',
                      '..XX.']
-        self.assertEqual(check_rotational(mini_grid), None)
-        self.assertEqual(check_reflection(mini_grid), mini_grid)
-        self.assertEqual(check_diagonal(mini_grid), None)
+        self.assertEqual(None, check_rotational(mini_grid))
+        self.assertEqual(mini_grid, check_reflection(mini_grid))
+        self.assertEqual(None, check_diagonal(mini_grid))
         mini_grid = ['..XX.',
                      '.XXXX',
                      'XXXXX',
                      'XXXX.',
                      '.XX..']
-        self.assertEqual(check_rotational(mini_grid), mini_grid)
-        self.assertEqual(check_reflection(mini_grid), None)
-        self.assertEqual(check_diagonal(mini_grid), mini_grid)
+        self.assertEqual(mini_grid, check_rotational(mini_grid))
+        self.assertEqual(None, check_reflection(mini_grid))
+        self.assertEqual(mini_grid, check_diagonal(mini_grid))
         mini_grid = ['...XX',
                      '.XXXX',
                      'XXXXX',
                      'XXXX.',
                      'XX...']
-        self.assertEqual(check_rotational(mini_grid), mini_grid)
-        self.assertEqual(check_reflection(mini_grid), None)
-        self.assertEqual(check_diagonal(mini_grid), None)
+        self.assertEqual(mini_grid, check_rotational(mini_grid))
+        self.assertEqual(None, check_reflection(mini_grid))
+        self.assertEqual(None, check_diagonal(mini_grid))
         mini_grid = ['...XX',
                      '.XXXX',
                      'XXXXX',
                      '.XXXX',
                      '...XX']
-        self.assertEqual(check_rotational(mini_grid), None)
-        self.assertEqual(check_reflection(mini_grid), mini_grid)
-        self.assertEqual(check_diagonal(mini_grid), None)
+        self.assertEqual(None, check_rotational(mini_grid))
+        self.assertEqual(mini_grid, check_reflection(mini_grid))
+        self.assertEqual(None, check_diagonal(mini_grid))
 
     def test_offset(self):
         mini_grid = ['.....',
@@ -69,12 +69,22 @@ class IntegrityTest(TestCase):
                      'XXXXX',
                      'XXXX.',
                      'XX...']
-        self.assertEqual(check_rotational(mini_grid), (0,1))
-        self.assertEqual(check_reflection(mini_grid), None)
-        self.assertEqual(check_diagonal(mini_grid), None)
+        self.assertEqual(mini_grid[1:], check_rotational(mini_grid))
+        self.assertEqual(None, check_reflection(mini_grid))
+        self.assertEqual(None, check_diagonal(mini_grid))
+        mini_grid = ['..XXX',
+                     '.XXXX',
+                     'XXXXX',
+                     'XXXX.',
+                     'XXX..',
+                     'XXXXX',
+                     'XXXX.']
+        self.assertEqual(mini_grid[:-2], check_rotational(mini_grid))
+        self.assertEqual(None, check_reflection(mini_grid))
+        self.assertEqual(mini_grid[:-2], check_diagonal(mini_grid))
 
 
-    def test_clean_edges(self):
+    def test_supermega(self):
         # 2022 NYT Super Mega (with one error)
         expected = ['XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX..XXXXX.XXXXXXXXX.XXXXXXXXX',
                     'XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXXX.XXXXXXXXX',
@@ -119,7 +129,10 @@ class IntegrityTest(TestCase):
                     'XXXXXXXXX.XXXXXXXXX.XXXXX..XXXXXX.XXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXXX']
         with open('supermegagrid.txt', 'r+') as f:
             grid = [line.strip('\n') for line in f.readlines()]
-        self.assertEqual(expected, clean_edges(grid))
+        self.assertEqual((expected, {'top':3, 'bottom':25, 'left':3, 'right': 3}), clean_edges(grid))
+        self.assertEqual(expected, clean_edges(check_rotational(grid)))
+        self.assertEqual(None, clean_edges(check_diagonal(grid)))
+        self.assertEqual(None, clean_edges(check_reflection(grid)))
 
     def test_clean_edges_with_size(self):
         # NYT Mini 1/19/23
@@ -128,6 +141,5 @@ class IntegrityTest(TestCase):
                       'XXXXX',
                       'XXXXX',
                       'XXXXX']
-        expected = (mini_grid, None)
         self.assertEqual(clean_edges(mini_grid, (5, 5)), expected)
         # I think symmetry should come before this step, so I need to do that before I go any further
