@@ -60,7 +60,7 @@ def clean_edges(input_grid, target_size=(15, 15)):
 def check_rotational(input_grid):
     grid = np.array([[char for char in line] for line in input_grid])
     rotated_grid = np.rot90(grid, 2)
-    if rotated_grid == grid:
+    if np.all(rotated_grid == grid):
         return input_grid
     return find_offset(grid, rotated_grid)  # fixed grid or none
 
@@ -68,38 +68,51 @@ def check_rotational(input_grid):
 def check_diagonal(input_grid):
     grid = np.array([[char for char in line] for line in input_grid])
     flipped_grid = np.transpose(grid)
+    if grid.shape == flipped_grid.shape and np.all(grid == flipped_grid):
+        return input_grid
     temp = find_offset(grid, flipped_grid)
-    return temp if temp else np.flip(find_offset(np.flip(grid, 0), np.flip(flipped_grid, 0)), 0)  # other diagonal
+    if temp:
+        return temp
+    else:
+        temp = find_offset(np.flip(grid, 0), np.flip(flipped_grid, 0))
+        if temp:
+            return np.flip(temp, 0)
+        else:
+            return None
 
 
 def check_reflection(input_grid):
     grid = np.array([[char for char in line] for line in input_grid])
     vertical = np.flip(grid, 1)
     horizontal = np.flip(grid, 0)
-    if horizontal == grid or vertical == grid:
+    if np.all(horizontal == grid) or np.all(vertical == grid):
         return input_grid
     temp = find_offset(grid, horizontal)
     return temp if temp else find_offset(grid, vertical)
 
 
 def find_offset(input_grid, altered_grid):  # not enforced, but intended
-    # indexes get very confusing with two grids
-    # for clarity we define x and y based on input_grid and only use that
-    y, x = input_grid.shape
-    # worst-case, every overlapping square is wrong
-    minimum_bogie_ratio = 1
-    # take the grid and try lining its top-left corner up with various points in flipped_grid
-    for x_offset in range(x):
-        for y_offset in range(y):
-            grid_overlap = input_grid[x_offset:min(x, y + x_offset), y_offset:min(x + y_offset)]
-            altered_overlap = altered_grid[0:min(y, x - x_offset), 0:min(x, y - y_offset)]
-            bogie_count = np.count_nonzero(grid_overlap == altered_overlap)
-            if bogie_count == 0:
-                return x_offset, y_offset
-            elif grid_overlap.size > 4:
-                minimum_bogie_ratio = min(minimum_bogie_ratio, bogie_count/grid_overlap.size)
-                # best_offset = x_offset, y_offset
-                # up to 2 errors in a standard 15x15 grid (errors are doubled by reflection/rotation)
-                if minimum_bogie_ratio < .02:
-                    return grid_overlap
-    return None
+    iy, ix = input_grid.shape
+    ay, ax = altered_grid.shape
+    max_size = 0
+    best_offset = None
+    # take the altered grid and try lining its top-left corner up with various points in the input grid
+    for x_offset in range(ix):
+        for y_offset in range(iy):
+            grid_overlap = input_grid[y_offset:min(iy, ay + y_offset), x_offset:min(ix, ax + x_offset)]
+            altered_overlap = altered_grid[0:min(ay, iy - y_offset), 0:min(ax, ix - x_offset)]
+            bogie_count = np.count_nonzero(grid_overlap != altered_overlap)
+            bogie_ratio = bogie_count / grid_overlap.size
+            if (x_offset, y_offset) == (0,1):
+                print(bogie_ratio, grid_overlap.size)
+            if bogie_ratio < .01:
+                # 1 error in a standard 15x15 grid (remember, errors are doubled by reflection/rotation)
+                # up to 2 in a 21x21 (Sunday-size) puzzle
+                if grid_overlap.size > max_size:
+                    max_size = grid_overlap.size
+                    best_offset = (x_offset, y_offset)
+    # This is basically a guess, might want to adjust it
+    if max_size > .5*input_grid.size:
+        return best_offset  # Not sure this is returning what I want it to either
+    else:
+        return None
