@@ -93,8 +93,9 @@ def check_reflection(input_grid):
     horizontal = np.flip(grid, 0)
     if np.all(horizontal == grid) or np.all(vertical == grid):
         return input_grid
-    temp = find_offset(grid, horizontal)
-    return temp if temp else find_offset(grid, vertical)
+    horiz = find_offset(grid, horizontal)
+    vert = find_offset(grid, vertical)
+    return horiz if not vert or len(horiz)*len(horiz[0]) > len(vert)*len(vert[0]) else vert
 
 
 def find_offset(input_grid, altered_grid, first_try=True):  # not enforced, but intended
@@ -129,3 +130,7 @@ def find_offset(input_grid, altered_grid, first_try=True):  # not enforced, but 
             return find_offset(altered_grid, input_grid, False)
         else:
             return None
+
+def check_symmetries(grid, target_size=(15,15)):
+    best_symmetry = max([check_rotational(grid), check_diagonal(grid), check_reflection(grid)], key=lambda x: len(x)*len(x[0]) if x else 0)
+    return clean_edges(best_symmetry, target_size)
