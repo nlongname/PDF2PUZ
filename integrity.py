@@ -70,22 +70,29 @@ def check_rotational(input_grid):
         return input_grid
     return find_offset(grid, rotated_grid)  # fixed grid or none
 
+def check_diagonals(input_grid):
+    grid = input_grid
+    flipped_grid = input_grid[::-1]
+    diag = check_diagonal(grid)
+    flipped_diag = check_diagonal(flipped_grid)
+    if flipped_diag:
+        flipped_diag = flipped_diag[::-1]
+    if diag is None:
+        return flipped_diag
+    if flipped_diag is None:
+        return diag
+    return diag if len(diag)*len(diag[0]) > len(flipped_diag)*len(flipped_diag[0]) else flipped_diag
 
 def check_diagonal(input_grid):
     grid = np.array([[char for char in line] for line in input_grid])
-    flipped_grid = np.transpose(grid)
-    if grid.shape == flipped_grid.shape and np.all(grid == flipped_grid):
+    diagonal_grid = np.transpose(grid)
+    if grid.shape == diagonal_grid.shape and np.all(grid == diagonal_grid):
         return input_grid
-    temp = find_offset(grid, flipped_grid)
+    temp = find_offset(grid, diagonal_grid)
     if temp:
         return temp
     else:
-        temp = find_offset(np.flip(grid, 0), np.transpose(np.flip(grid, 0)))
-        if temp:
-            return temp[::-1]
-        else:
-            return None
-
+        return None
 
 def check_reflection(input_grid):
     grid = np.array([[char for char in line] for line in input_grid])
@@ -123,7 +130,7 @@ def find_offset(input_grid, altered_grid, first_try=True):  # not enforced, but 
     # This .5 is basically a guess, might want to adjust it
     # TODO: better way of determining whether an overlap is reasonable,
     #  possibly using the biggest of all symmetry results
-    if max_size > .5*input_grid.size:
+    if max_size > .75*input_grid.size:
         return best_grid
     else:
         if first_try:
@@ -131,6 +138,7 @@ def find_offset(input_grid, altered_grid, first_try=True):  # not enforced, but 
         else:
             return None
 
-def check_symmetries(grid, target_size=(15,15)):
-    best_symmetry = max([check_rotational(grid), check_diagonal(grid), check_reflection(grid)], key=lambda x: len(x)*len(x[0]) if x else 0)
-    return clean_edges(best_symmetry, target_size)
+def check_symmetries(grid, target_size = (15, 15)):
+    cleaned_grid = clean_edges(grid, target_size)
+    best_symmetry = max([check_rotational(cleaned_grid), check_diagonals(cleaned_grid), check_reflection(cleaned_grid)], key=lambda x: len(x) * len(x[0]) if x else 0)
+    return best_symmetry

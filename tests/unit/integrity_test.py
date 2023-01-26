@@ -11,10 +11,9 @@ class IntegrityTest(TestCase):
                      'XXXXX',
                      'XXXXX']
         self.assertNotEqual(mini_grid, check_rotational(mini_grid))
-        self.assertIsNotNone(check_rotational(mini_grid))
         self.assertNotEqual(mini_grid, check_reflection(mini_grid))
-        self.assertIsNotNone(check_reflection(mini_grid))
         self.assertEqual(mini_grid, check_diagonal(mini_grid))
+        self.assertEqual(mini_grid, check_diagonals(mini_grid))
         self.assertEqual(['..', '.X'], check_symmetries(mini_grid))
         self.assertEqual(mini_grid, check_symmetries(mini_grid, (5,5)))
         mini_grid = ['XXX..',  # checks other diagonal
@@ -23,9 +22,9 @@ class IntegrityTest(TestCase):
                      'XXXXX',
                      '.XXXX']
         self.assertNotEqual(mini_grid, check_rotational(mini_grid))
-        self.assertIsNotNone(check_rotational(mini_grid))
-        self.assertIsNone(check_reflection(mini_grid))
-        self.assertEqual(mini_grid, check_diagonal(mini_grid))
+        self.assertNotEqual(mini_grid, check_reflection(mini_grid))
+        self.assertNotEqual(mini_grid, check_diagonal(mini_grid))
+        self.assertEqual(mini_grid, check_diagonals(mini_grid))
         self.assertEqual(mini_grid, check_symmetries(mini_grid))
         self.assertEqual(mini_grid, check_symmetries(mini_grid, (5,5)))
         mini_grid = ['..X..',
@@ -33,41 +32,45 @@ class IntegrityTest(TestCase):
                      'XXXXX',
                      'XXXXX',
                      '.XXX.']
-        self.assertEqual(None, check_rotational(mini_grid))
+        self.assertNotEqual(mini_grid, check_rotational(mini_grid))
         self.assertEqual(mini_grid, check_reflection(mini_grid))
-        self.assertEqual(None, check_diagonal(mini_grid))
+        self.assertNotEqual(mini_grid, check_diagonal(mini_grid))
+        self.assertNotEqual(mini_grid, check_diagonals(mini_grid))
+        self.assertEqual(mini_grid, check_symmetries(mini_grid))
+        self.assertEqual(mini_grid, check_symmetries(mini_grid, (5,5)))
         mini_grid = ['..XX.',
                      '.XXXX',
                      'XXXXX',
                      '.XXXX',
                      '..XX.']
-        self.assertEqual(None, check_rotational(mini_grid))
+        self.assertNotEqual(mini_grid, check_rotational(mini_grid))
         self.assertEqual(mini_grid, check_reflection(mini_grid))
-        self.assertEqual(None, check_diagonal(mini_grid))
+        self.assertNotEqual(mini_grid, check_diagonal(mini_grid))
+        self.assertNotEqual(mini_grid, check_diagonals(mini_grid))
+        self.assertEqual(mini_grid, check_symmetries(mini_grid))
+        self.assertEqual(mini_grid, check_symmetries(mini_grid, (5,5)))
         mini_grid = ['..XX.',
                      '.XXXX',
                      'XXXXX',
                      'XXXX.',
                      '.XX..']
         self.assertEqual(mini_grid, check_rotational(mini_grid))
-        self.assertEqual(None, check_reflection(mini_grid))
+        self.assertNotEqual(mini_grid, check_reflection(mini_grid))
         self.assertEqual(mini_grid, check_diagonal(mini_grid))
+        self.assertEqual(mini_grid, check_diagonals(mini_grid))
+        self.assertEqual(mini_grid, check_symmetries(mini_grid))
+        self.assertEqual(mini_grid, check_symmetries(mini_grid, (5,5)))
         mini_grid = ['...XX',
                      '.XXXX',
                      'XXXXX',
                      'XXXX.',
                      'XX...']
         self.assertEqual(mini_grid, check_rotational(mini_grid))
-        self.assertEqual(None, check_reflection(mini_grid))
-        self.assertEqual(None, check_diagonal(mini_grid))
-        mini_grid = ['...XX',
-                     '.XXXX',
-                     'XXXXX',
-                     '.XXXX',
-                     '...XX']
-        self.assertEqual(None, check_rotational(mini_grid))
-        self.assertEqual(mini_grid, check_reflection(mini_grid))
-        self.assertEqual(None, check_diagonal(mini_grid))
+        self.assertNotEqual(mini_grid, check_reflection(mini_grid))
+        self.assertNotEqual(mini_grid, check_diagonal(mini_grid))
+        self.assertNotEqual(mini_grid, check_diagonals(mini_grid))
+        self.assertEqual(mini_grid, check_symmetries(mini_grid))
+        self.assertEqual(mini_grid, check_symmetries(mini_grid, (5,5)))
 
     def test_offset(self):
         mini_grid = ['.....',
@@ -93,7 +96,7 @@ class IntegrityTest(TestCase):
 
     def test_supermega(self):
         # 2022 NYT Super Mega (with one error)
-        expected = ['XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX..XXXXX.XXXXXXXXX.XXXXXXXXX',
+        cleaned = ['XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX..XXXXX.XXXXXXXXX.XXXXXXXXX',
                     'XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXXX.XXXXXXXXX',
                     'XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXXX.XXXXXXXXX',
                     'XXXXX.XXXX.XXXXX.XXX.XXXXXXX.XXXXXXXXXXXXXXXXXX.XXXXXXXXXXX.XXXXXXX',
@@ -136,11 +139,13 @@ class IntegrityTest(TestCase):
                     'XXXXXXXXX.XXXXXXXXX.XXXXX..XXXXXX.XXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXXX']
         with open('supermegagrid.txt', 'r+') as f:
             grid = [line.strip('\n') for line in f.readlines()]
-        self.assertEqual((expected), clean_edges(grid))
-        self.assertEqual(expected, clean_edges(check_rotational(grid)))
-        self.assertEqual(expected, clean_edges(check_rotational(grid), (67,41)))
-        self.assertEqual(None, clean_edges(check_diagonal(grid)))
-        self.assertEqual(None, clean_edges(check_reflection(grid)))
+        self.assertEqual(cleaned, clean_edges(grid))
+        self.assertEqual(cleaned, check_rotational(cleaned))
+        self.assertNotEqual(cleaned, check_reflection(cleaned))
+        self.assertNotEqual(cleaned, check_diagonal(cleaned))
+        self.assertNotEqual(cleaned, check_diagonals(cleaned))
+        self.assertEqual(cleaned, check_symmetries(grid))
+        self.assertEqual(cleaned, check_symmetries(grid, (67,41)))
 
     def test_clean_edges_with_size(self):
         # NYT Mini 1/19/23
