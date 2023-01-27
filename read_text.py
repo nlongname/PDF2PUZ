@@ -32,7 +32,7 @@ def extract_clues(raw: str, clues: dict):
 			to_delete.append(i+1)  # e.g. we find 2 and 23 at an index? we're going to find 3 at the next index
 			numbers_at[i] = [max(numbers_at[i])]  # and we want 23 not 2 here
 	numbers_at = {k: v[0] for k, v in numbers_at.items() if k not in to_delete}
-	indices = [(numbers_at[l], l) for l in sorted(numbers_at.keys())]
+	indices = [(numbers_at[m], m) for m in sorted(numbers_at.keys())]
 	streaks = []
 	last_split = 0
 	for i in range(1, len(indices)):

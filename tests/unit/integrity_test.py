@@ -92,6 +92,26 @@ class IntegrityTest(TestCase):
         self.assertEqual(mini_grid[1:], check_rotational(mini_grid))
         self.assertEqual(None, check_reflection(mini_grid))
         self.assertEqual(None, check_diagonal(mini_grid))
+        mini_grid = ['.....',
+                     '...XX',
+                     '.XXXX',
+                     'XXXXX',
+                     'XXXX.',
+                     'XX...',
+                     'XXXXX']
+        self.assertEqual(mini_grid, check_rotational(mini_grid))
+        self.assertEqual(None, check_reflection(mini_grid))
+        self.assertEqual(None, check_diagonal(mini_grid))
+        mini_grid = ['.....',
+                     '...XX',
+                     '.XXXX',
+                     'XXXXX',
+                     'XXXX.',
+                     'XX...',
+                     '.....']
+        self.assertEqual(mini_grid[1:-1], check_rotational(mini_grid))
+        self.assertEqual(None, check_reflection(mini_grid))
+        self.assertEqual(None, check_diagonal(mini_grid))
 
     def test_supermega(self):
         # 2022 NYT Super Mega (with one error)

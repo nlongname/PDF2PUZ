@@ -11,7 +11,7 @@ import numpy as np
 
 
 def area(rect):
-    if rect == None:
+    if rect is None:
         return 0
     else:
         return len(rect)*len(rect[0])
@@ -113,17 +113,17 @@ def find_offsets(input_grid, altered_grid):
     return first_try if area(first_try) > area(second_try) else second_try
 
 
-def find_offset(left_grid, right_grid, focus_left:bool):
-    iy, ix = left_grid.shape
-    ay, ax = right_grid.shape
+def find_offset(left_grid, right_grid, focus_left: bool):
+    ly, lx = left_grid.shape
+    ry, rx = right_grid.shape
     max_size = 0
     best_grid = None
     # take the altered grid and try lining its top-left corner up with various points in the input grid
-    # accuracies = np.empty((iy, ix))
-    for x_offset in range(ix):
-        for y_offset in range(iy):
-            left_overlap = left_grid[y_offset:min(iy, ay + y_offset), x_offset:min(ix, ax + x_offset)]
-            right_overlap = right_grid[0:min(ay, iy - y_offset), 0:min(ax, ix - x_offset)]
+    # accuracies = np.empty((ly, lx))
+    for x_offset in range(lx):
+        for y_offset in range(ly):
+            left_overlap = left_grid[y_offset:min(ly, ry + y_offset), x_offset:min(lx, rx + x_offset)]
+            right_overlap = right_grid[0:min(ry, ly - y_offset), 0:min(rx, lx - x_offset)]
             bogie_count = np.count_nonzero(left_overlap != right_overlap)
             bogie_ratio = bogie_count / left_overlap.size
             # accuracies[y_offset,x_offset] = bogie_ratio
@@ -142,12 +142,16 @@ def find_offset(left_grid, right_grid, focus_left:bool):
     # TODO: better way of determining area of overlap to eliminate bogies on all sides;
     #  maybe something recursive? knock off two sides then go back for the other two
     # print(accuracies)
-    if max_size > .5*left_grid.size:
+    if max_size > .25*left_grid.size:
         return best_grid
     else:
         return None
 
-def check_symmetries(grid, target_size = (15, 15)):
+
+def check_symmetries(grid, target_size=(15, 15)):
     cleaned_grid = clean_edges(grid, target_size)
-    best_symmetry = max([check_rotational(cleaned_grid), check_diagonals(cleaned_grid), check_reflection(cleaned_grid)], key=area)
+    best_symmetry = max([check_rotational(cleaned_grid),
+                         check_diagonals(cleaned_grid),
+                         check_reflection(cleaned_grid)],
+                        key=area)
     return best_symmetry
