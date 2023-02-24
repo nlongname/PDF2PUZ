@@ -99,7 +99,7 @@ class IntegrityTest(TestCase):
                      'XXXX.',
                      'XX...',
                      'XXXXX']
-        self.assertEqual(mini_grid, check_rotational(mini_grid))
+        self.assertEqual(mini_grid[1:-1], check_rotational(mini_grid))
         self.assertEqual(None, check_reflection(mini_grid))
         self.assertEqual(None, check_diagonal(mini_grid))
         mini_grid = ['.....',

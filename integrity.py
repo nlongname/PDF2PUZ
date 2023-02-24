@@ -119,34 +119,19 @@ def find_offset(left_grid, right_grid, focus_left: bool):
     max_size = 0
     best_grid = None
     # take the altered grid and try lining its top-left corner up with various points in the input grid
-    # accuracies = np.empty((ly, lx))
     for x_offset in range(lx):
         for y_offset in range(ly):
             left_overlap = left_grid[y_offset:min(ly, ry + y_offset), x_offset:min(lx, rx + x_offset)]
             right_overlap = right_grid[0:min(ry, ly - y_offset), 0:min(rx, lx - x_offset)]
-            overlap_height, overlap_length = left_overlap.shape
-            ranges = {y: [] for y in range(overlap_height)}
             bogie_map = (left_overlap != right_overlap)
-            for y in range(overlap_height):
-                streak = 0
-                for x in range(overlap_length):
-                    if not bogie_map[y, x]:
-                        streak += 1
-                    else:
-                        if streak > 1:
-                            ranges[y].append((x - streak, x - 1))
-                        streak = 0
-                if streak != 0:
-                    ranges[y].append((x - streak + 1, x))
-            ranges = {k:ranges[k] for k in ranges if ranges[k] != []}
             bogie_count = np.count_nonzero(bogie_map)
             bogie_ratio = bogie_count / left_overlap.size
-            # accuracies[y_offset,x_offset] = bogie_ratio
             if bogie_ratio < .01:
-                # 1 error in a standard 15x15 grid (remember, errors are doubled by reflection/rotation)
+                # equivalent to 1 error in a standard 15x15 grid
+                # (because errors are generally doubled by reflection/rotation)
                 # up to 2 in a 21x21 (Sunday-size) puzzle
                 if left_overlap.size > max_size:
-                    print(ranges)
+                    # print(ranges)
                     # print("good one", left_overlap.size)
                     # best_offset = (x_offset, y_offset)
                     max_size = left_overlap.size
@@ -154,7 +139,7 @@ def find_offset(left_grid, right_grid, focus_left: bool):
                         best_grid = [''.join(line) for line in left_overlap]
                     else:
                         best_grid = [''.join(line) for line in right_overlap]
-    # This .5 is basically a guess, might want to adjust it
+    # This number is basically a guess, might want to adjust it
     # TODO: better way of determining area of overlap to eliminate bogies on all sides;
     #  maybe something recursive? knock off two sides then go back for the other two
     # print(accuracies)
