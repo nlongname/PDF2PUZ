@@ -17,7 +17,7 @@ def read(filename: str):
 
 
 def extract_clues(raw: str, clues: dict):
-	print(raw)
+	#print(raw)
 	indices = [None]
 	num = 1
 	numbers_at = {}
@@ -57,7 +57,8 @@ def extract_clues(raw: str, clues: dict):
 			cumulative_set.update([s[0] for s in streaks[i]])
 			i += 1
 		if i == len(streaks):
-			raise Exception("target set not found")
+			#raise Exception("target set not found")
+			return None
 		max_index = i
 		i -= 1
 		cumulative_set = set()
@@ -109,8 +110,11 @@ def extract_clues(raw: str, clues: dict):
 		if temp_clues == clues['down']:
 			down_clues = [raw[temp_indices[j]+len(str(temp_clues[j])):temp_indices[j+1]].strip() for j in range(len(temp_clues))]
 		if temp_clues == clues['across']:
-			across_clues = [raw[temp_indices[j]+len(str(temp_clues[j])):temp_indices[j+1]].strip() for j in range(len(temp_clues))]	
-	return {'down': down_clues, 'across': across_clues}
+			across_clues = [raw[temp_indices[j]+len(str(temp_clues[j])):temp_indices[j+1]].strip() for j in range(len(temp_clues))]
+	try:
+		return {'down': down_clues, 'across': across_clues}
+	except UnboundLocalError:
+		return None
 
 
 if __name__ == '__main__':
