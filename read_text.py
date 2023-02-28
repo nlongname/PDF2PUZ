@@ -72,15 +72,18 @@ def extract_clues(raw: str, clues: dict):
 			while True:
 				bogies = []
 				for j in range(len(cumulative_list)):
-					if j == 0:
-						if cumulative_list[0][0] != clues[name][0]:
-							bogies.append(0)
-					elif j == len(cumulative_list)-1:
-						if cumulative_list[-1][0] != clues[name][-1]:
+					try:
+						if j == 0:
+							if cumulative_list[0][0] != clues[name][0]:
+								bogies.append(0)
+						elif j == len(cumulative_list)-1:
+							if cumulative_list[-1][0] != clues[name][-1]:
+								bogies.append(j)
+						elif clues[name][clues[name].index(cumulative_list[j][0])-1] not in [pair[0] for pair in cumulative_list[:j]] \
+							or clues[name][clues[name].index(cumulative_list[j][0])+1] not in [pair[0] for pair in cumulative_list[j+1:]]:
 							bogies.append(j)
-					elif clues[name][clues[name].index(cumulative_list[j][0])-1] not in [pair[0] for pair in cumulative_list[:j]] \
-						or clues[name][clues[name].index(cumulative_list[j][0])+1] not in [pair[0] for pair in cumulative_list[j+1:]]:
-						bogies.append(j)
+					except(IndexError):
+						break
 				if not bogies:
 					break
 				cumulative_list = [pair for i, pair in enumerate(cumulative_list) if i not in bogies]

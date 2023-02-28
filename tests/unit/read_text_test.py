@@ -23,5 +23,6 @@ class TextTest(TestCase):
         modified_clues = {'across': [n if n != 6 else 7 for n in self.LAT_clues['across']],
                           'down': [n if n != 6 else 7 for n in self.LAT_clues['down']]}
         self.assertIsNone(extract_clues(modified_raw, modified_clues))
-
-        # Next: test a realistic clue-number error that might happen from a grid issue
+        modified_clues = {'across': [n if n != 6 else 7 for n in self.LAT_clues['across']],
+                          'down': [n for n in self.LAT_clues['down']]}
+        self.assertIsNone(extract_clues(modified_raw, modified_clues))
