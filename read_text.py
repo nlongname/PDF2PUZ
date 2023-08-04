@@ -17,7 +17,7 @@ def read(filename: str):
 
 
 def extract_clues(raw: str, clues: dict):
-	print(raw)
+	#print(raw)
 	indices = [None]
 	num = 1
 	numbers_at = {}
@@ -32,7 +32,7 @@ def extract_clues(raw: str, clues: dict):
 			to_delete.append(i+1)  # e.g. we find 2 and 23 at an index? we're going to find 3 at the next index
 			numbers_at[i] = [max(numbers_at[i])]  # and we want 23 not 2 here
 	numbers_at = {k: v[0] for k, v in numbers_at.items() if k not in to_delete}
-	indices = [(numbers_at[l], l) for l in sorted(numbers_at.keys())]
+	indices = [(numbers_at[m], m) for m in sorted(numbers_at.keys())]
 	streaks = []
 	last_split = 0
 	for i in range(1, len(indices)):
@@ -57,7 +57,8 @@ def extract_clues(raw: str, clues: dict):
 			cumulative_set.update([s[0] for s in streaks[i]])
 			i += 1
 		if i == len(streaks):
-			raise Exception("target set not found")
+			#raise Exception("target set not found")
+			return None
 		max_index = i
 		i -= 1
 		cumulative_set = set()
@@ -71,15 +72,18 @@ def extract_clues(raw: str, clues: dict):
 			while True:
 				bogies = []
 				for j in range(len(cumulative_list)):
-					if j == 0:
-						if cumulative_list[0][0] != clues[name][0]:
-							bogies.append(0)
-					elif j == len(cumulative_list)-1:
-						if cumulative_list[-1][0] != clues[name][-1]:
+					try:
+						if j == 0:
+							if cumulative_list[0][0] != clues[name][0]:
+								bogies.append(0)
+						elif j == len(cumulative_list)-1:
+							if cumulative_list[-1][0] != clues[name][-1]:
+								bogies.append(j)
+						elif clues[name][clues[name].index(cumulative_list[j][0])-1] not in [pair[0] for pair in cumulative_list[:j]] \
+							or clues[name][clues[name].index(cumulative_list[j][0])+1] not in [pair[0] for pair in cumulative_list[j+1:]]:
 							bogies.append(j)
-					elif clues[name][clues[name].index(cumulative_list[j][0])-1] not in [pair[0] for pair in cumulative_list[:j]] \
-						or clues[name][clues[name].index(cumulative_list[j][0])+1] not in [pair[0] for pair in cumulative_list[j+1:]]:
-						bogies.append(j)
+					except(IndexError):
+						break
 				if not bogies:
 					break
 				cumulative_list = [pair for i, pair in enumerate(cumulative_list) if i not in bogies]
@@ -109,8 +113,11 @@ def extract_clues(raw: str, clues: dict):
 		if temp_clues == clues['down']:
 			down_clues = [raw[temp_indices[j]+len(str(temp_clues[j])):temp_indices[j+1]].strip() for j in range(len(temp_clues))]
 		if temp_clues == clues['across']:
-			across_clues = [raw[temp_indices[j]+len(str(temp_clues[j])):temp_indices[j+1]].strip() for j in range(len(temp_clues))]	
-	return {'down': down_clues, 'across': across_clues}
+			across_clues = [raw[temp_indices[j]+len(str(temp_clues[j])):temp_indices[j+1]].strip() for j in range(len(temp_clues))]
+	try:
+		return {'down': down_clues, 'across': across_clues}
+	except UnboundLocalError:
+		return None
 
 
 if __name__ == '__main__':

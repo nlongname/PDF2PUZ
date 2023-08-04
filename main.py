@@ -1,10 +1,7 @@
 # Import libraries
-from PIL import Image
 # import pytesseract
 # import sys
-from pdf2image import convert_from_path
 import os
-import numpy as np
 import pprint as pp
 
 from grid import *
