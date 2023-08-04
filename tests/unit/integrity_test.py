@@ -16,7 +16,7 @@ class IntegrityTest(TestCase):
         self.assertIsNotNone(check_reflection(mini_grid))
         self.assertEqual(mini_grid, check_diagonal(mini_grid))
         self.assertEqual(['..', '.X'], check_symmetries(mini_grid))
-        self.assertEqual(mini_grid, check_symmetries(mini_grid, (5,5)))
+        self.assertEqual(mini_grid, check_symmetries(mini_grid, (5, 5)))
         mini_grid = ['XXX..',  # checks other diagonal
                      'XXXX.',
                      'XXXXX',
@@ -27,7 +27,7 @@ class IntegrityTest(TestCase):
         self.assertIsNone(check_reflection(mini_grid))
         self.assertEqual(mini_grid, check_diagonal(mini_grid))
         self.assertEqual(mini_grid, check_symmetries(mini_grid))
-        self.assertEqual(mini_grid, check_symmetries(mini_grid, (5,5)))
+        self.assertEqual(mini_grid, check_symmetries(mini_grid, (5, 5)))
         mini_grid = ['..X..',
                      '.XXX.',
                      'XXXXX',
@@ -90,7 +90,6 @@ class IntegrityTest(TestCase):
         self.assertEqual(None, check_reflection(mini_grid))
         self.assertEqual(mini_grid[:-2], check_diagonal(mini_grid))
 
-
     def test_supermega(self):
         # 2022 NYT Super Mega (with one error)
         expected = ['XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX..XXXXX.XXXXXXXXX.XXXXXXXXX',
@@ -136,9 +135,9 @@ class IntegrityTest(TestCase):
                     'XXXXXXXXX.XXXXXXXXX.XXXXX..XXXXXX.XXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXXX']
         with open('supermegagrid.txt', 'r+') as f:
             grid = [line.strip('\n') for line in f.readlines()]
-        self.assertEqual((expected), clean_edges(grid))
+        self.assertEqual(expected, clean_edges(grid))
         self.assertEqual(expected, clean_edges(check_rotational(grid)))
-        self.assertEqual(expected, clean_edges(check_rotational(grid), (67,41)))
+        self.assertEqual(expected, clean_edges(check_rotational(grid), (67, 41)))
         self.assertEqual(None, clean_edges(check_diagonal(grid)))
         self.assertEqual(None, clean_edges(check_reflection(grid)))
 

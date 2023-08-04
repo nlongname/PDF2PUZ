@@ -25,10 +25,13 @@ def find_pdfs(filepath=None):
     return pdfs  # for now I won't include the folder, but I might need to
 
 
-def grid_from_pdf(filename, gridsize=(15, 15)):
-    if filename[-4:] == '.pdf':
+def luminance(pixel):
+    R,G,B = pixel
+    return (0.2126 * R + 0.7152 * G + 0.0722 * B)
+
+def grid_from_pdf(filename, gridsize=(15, 15), dpi = 200):
+    if filename[-4:] == '.pdf': # should be standardized and unnecessary
         filename = filename[:-4]
-    dpi = 200
     pic = convert_from_path(filename, dpi=dpi, fmt="png")[0]  # hopefully PNG will be more consistent than JPG
     # TODO: dynamically change DPI. 200 works the best (but breaks on supermega),
     #  50 is way faster but leaves artifacts (DICT, supermega)
@@ -42,7 +45,7 @@ def grid_from_pdf(filename, gridsize=(15, 15)):
 
     # isolate black squares in grid
     pixels = Image.open(f"{filename}.png")
-    pixel_array = np.array(pixels)
+    pixel_array = np.array([luminance(p) for p in pixels])
     black = set()
     a = 10  # TODO: make a more descriptive name and make it parametric
     ranges = {y: [] for y in range(pic.size[1])}

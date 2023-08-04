@@ -98,7 +98,7 @@ def check_reflection(input_grid):
     return horiz if not vert or len(horiz)*len(horiz[0]) > len(vert)*len(vert[0]) else vert
 
 
-def find_offset(input_grid, altered_grid, first_try=True):  # not enforced, but intended
+def find_offset(input_grid, altered_grid, first_try=True):  # should change names now that I'm swapping them sometimes
     iy, ix = input_grid.shape
     ay, ax = altered_grid.shape
     max_size = 0
@@ -131,6 +131,7 @@ def find_offset(input_grid, altered_grid, first_try=True):  # not enforced, but 
         else:
             return None
 
-def check_symmetries(grid, target_size=(15,15)):
+
+def check_symmetries(grid, target_size=(15, 15)):
     best_symmetry = max([check_rotational(grid), check_diagonal(grid), check_reflection(grid)], key=lambda x: len(x)*len(x[0]) if x else 0)
     return clean_edges(best_symmetry, target_size)
