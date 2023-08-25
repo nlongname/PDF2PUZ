@@ -1,12 +1,20 @@
 import numpy as np
 from pdf2image import convert_from_path
 from PIL import Image
+import pprint as pp
+from math import sqrt
+
+
+def luminance(pixel):
+	r, g, b = pixel
+	return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
 
 def grid_from_pdf(filename, gridsize=(15, 15)):
 	if filename[-4:] == '.pdf':
 		filename = filename[:-4]
 	dpi = 200
-	pic = convert_from_path(filename, dpi=dpi, fmt="png")[0] # hopefully PNG will be more consistent than JPG
+	pic = convert_from_path(filename, dpi=dpi, fmt="png")[0]  # hopefully PNG will be more consistent than JPG
 	# TODO: dynamically change DPI. 200 works the best (but breaks on supermega),
 	#  50 is way faster but leaves artifacts (DICT, for example)
 	pic.save(f"{filename}.png", 'PNG')
@@ -16,28 +24,40 @@ def grid_from_pdf(filename, gridsize=(15, 15)):
 	#        text = pytesseract.image_to_string(f"{name}.jpg")
 	#        f.write(text)
 	#        f.close()
-	return grid_from_pic(f"{filename}.png", gridsize)
+	return grid_from_pic(f"{filename}.png", gridsize, dpi)
 
-def grid_from_pic(filename, gridsize=(15,15)):
-	#TODO: debug/refactor  this split when I can actually use pdf2image
 
-	pixels = Image.open(filename)
-	pixel_array = np.array(pixels)
+def grid_from_pic(filename, gridsize=(15, 15), dpi=200):
+	# TODO: debug/refactor  this split when I can actually use pdf2image
+
+	pic = Image.open(filename)
+	pixel_array = np.array([[luminance(p) for p in q] for q in np.array(pic)])
+
+	luminance_cutoff = 100  # TODO: make this dynamic, maybe based on "black" pixel count?
+
+	test_array = np.array([[[255, 255, 255] if p > luminance_cutoff else [0, 0, 0] for p in q]
+						   for q in pixel_array], dtype='uint8')
+	test_image = Image.fromarray(test_array)
+	test_image.show()
+
 	black = set()
-	a = 10  # TODO: make a more descriptive name and make it parametric
+	a = round(5*sqrt(dpi/50))  # TODO: make a more descriptive name and make it parametric
+	# I think this initial guess is the core problem that's leading to chaotic outcomes for different DPI/a-values
+	# TODO: use initial guess based on domain knowledge of crosswords, not presumably-messy data
 	ranges = {y: [] for y in range(pic.size[1])}
 	# isolate black squares in grid
 	for y in range(pic.size[1]):
 		streak = 0
 		for x in range(pic.size[0]):
-			if sum(pixel_array[y, x]) <= 255 * 3 / 2:
+			if pixel_array[y, x] < luminance_cutoff:
 				black.add((y, x))
 				streak += 1
 			else:
-				if streak > 2 * a:
+				if streak > 2*a:
 					ranges[y].append((x - streak, x - 1))
 				streak = 0
 	ranges = {r: ranges[r] for r in ranges if ranges[r] != []}
+	print(ranges)
 
 	# process coordinates to try to find grid
 
@@ -45,18 +65,26 @@ def grid_from_pic(filename, gridsize=(15,15)):
 	for y in ranges:
 		r = ranges[y]
 		for i in r:
+			w = abs(i[1]-i[0])
+			widths[w] = widths[w] + 2 if w in widths else 2  # later process double-counts, so we double here too
 			for j in r:
 				if i != j:
 					u = abs(i[0] - j[0])
 					v = abs(i[1] - j[1])
 					widths[u] = widths[u] + 1 if u in widths else 1
 					widths[v] = widths[v] + 1 if v in widths else 1
-	widths = {y: widths[y] for y in widths if widths[y] > sum(widths.values()) / 100}
+	print(widths)
+	cutoff = sum(widths.values()) / 100
+	widths = {y: widths[y] for y in widths if widths[y] > cutoff}  # eliminate outliers
+	best = [w for w in widths if widths[w] == max(widths.values())]
 	widths = sorted(widths.keys())
-	# I think this initial guess is the core problem that's leading to chaotic outcomes for different DPI/a-values
-	# TODO: use initial guess based on domain knowledge of crosswords, not presumably-messy data
+	print(widths)
 	print(pic.size, dpi, gridsize)
-	guess = round(pic.size[1] / 3 / dpi / gridsize[1] + pic.size[0] / 2.3 / dpi / 2 / gridsize[0])
+
+	#guess = sum(best)/len(best)
+
+	guess = round(.5 * (pic.size[1] / 3 / gridsize[1] + pic.size[0] / 2.3 / gridsize[0]))
+	print(guess)
 	# guess = min([widths[i + 1] - widths[i] for i in range(len(widths) - 1) if
 	#              widths[i + 1] - widths[i] > 2 * a])  # not sure about this 2*a
 	boxes = {}
@@ -87,6 +115,7 @@ def grid_from_pic(filename, gridsize=(15,15)):
 			i = 0
 			working = True
 	ranges = {y: ranges[y] for y in ranges if ranges[y] != []}
+	print(ranges)
 	for r in ranges:
 		temp = []
 		for d in ranges[r]:
@@ -109,6 +138,7 @@ def grid_from_pic(filename, gridsize=(15,15)):
 					to_keep.append(past_y)
 			streak = 0
 	ranges = {k: v for k, v in ranges.items() if k in to_keep}
+	print(ranges)
 
 	# the .5's are to get the centers of the squares
 	left = min(ranges)
@@ -119,13 +149,14 @@ def grid_from_pic(filename, gridsize=(15,15)):
 		y = round(left + guess * (i + .5))
 		if y in ranges:
 			for d in ranges[y]:
+				print(d, (round((d[0]-baseline)/guess), round((d[1]-baseline)/guess)))
 				for j in range(round((d[0] - baseline) / guess), round((d[1] - baseline) / guess)):
 					black_squares.add((i, j))
-					black_square_counts[(i, j)] = black_square_counts[(i, j)] + 1 if (i,
-																					  j) in black_square_counts else 1
+					black_square_counts[(i, j)] = black_square_counts[(i, j)] + 1 if (i, j) in black_square_counts \
+						else 1
 	offset = -min(black_squares, key=lambda y: y[1])[1]
 	black_squares = {(y[0], y[1] + offset) for y in black_squares}
-	x_size = max(black_squares, key=lambda z: z[0])[0] + 1
+	x_size = max(black_squares, key=lambda z: z[0])[0] + 1  # TODO: adjust size and redo if x_size and y_size are close but wrong?
 	y_size = max(black_squares, key=lambda z: z[1])[1] + 1
 
 	print(x_size, y_size)
@@ -146,7 +177,7 @@ def grid_from_pic(filename, gridsize=(15,15)):
 	for bs in black_squares:
 		transpose[bs[0]] = transpose[bs[0]][:bs[1]] + '.' + transpose[bs[0]][bs[1] + 1:]
 	# across = sum(l.count('.x') + l.count('.X') + (1 if l[0] != '.' else 0) for l in transpose)
-	pp.pprint(transpose)
+	# pp.pprint(transpose)
 	# TODO: crossword-specific integrity check: check symmetry, check size compared to expected, etc.
 	# (possibly combined) check if full rows or columns are all dots, which seems to happen at low DPI;
 	# if so remove them and re-do sizes
