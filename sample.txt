@@ -94,3 +94,17 @@ Female pilot
 Medics
 Homages
 Coat part
+Idle
+Type of sandwich
+Clean and care for
+"____ through!"
+Smallest planet of the Sun
+Cover
+One who works despite a strike
+Glacial ridge
+Org.
+Before
+Tax break savings account
+<NOTEPAD>
+This is an example notepad entry with
+two lines in it.

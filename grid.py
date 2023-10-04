@@ -76,12 +76,12 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=200):
 	print(widths)
 	cutoff = sum(widths.values()) / 100
 	widths = {y: widths[y] for y in widths if widths[y] > cutoff}  # eliminate outliers
-	best = [w for w in widths if widths[w] == max(widths.values())]
+	# best = [w for w in widths if widths[w] == max(widths.values())]
 	widths = sorted(widths.keys())
 	print(widths)
 	print(pic.size, dpi, gridsize)
 
-	#guess = sum(best)/len(best)
+	# guess = sum(best)/len(best)
 
 	guess = round(.5 * (pic.size[1] / 3 / gridsize[1] + pic.size[0] / 2.3 / gridsize[0]))
 	print(guess)
@@ -141,23 +141,30 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=200):
 	print(ranges)
 
 	# the .5's are to get the centers of the squares
-	left = min(ranges)
-	baseline = ranges[round(left + guess * .5)][0][0]  # this will break if there's a bogie on the left side
+	left = min(ranges.values())[0][0]
+	print(left)
+	right = max(ranges.values(), key=lambda r: r[-1][-1])[-1][-1]
+	print(right)
+	full_lines = [k for k in ranges if ranges[k] == [(left, right)]]
+	len_before = 0
+	len_after = len(full_lines)
+	# this full-line method works very well on certain files, but fails completely on many others
+	# might be useful as a backup method later on
+	while len_before != len_after:
+		full_lines = [l for l in full_lines if l+1 not in full_lines]
+		len_before = len_after
+		len_after = len(full_lines)
+	y_size = len_after - 1
+
 	black_squares = set()
-	black_square_counts = {}
-	for i in range(round((max(ranges) - left) / guess)):
-		y = round(left + guess * (i + .5))
-		if y in ranges:
-			for d in ranges[y]:
-				print(d, (round((d[0]-baseline)/guess), round((d[1]-baseline)/guess)))
-				for j in range(round((d[0] - baseline) / guess), round((d[1] - baseline) / guess)):
-					black_squares.add((i, j))
-					black_square_counts[(i, j)] = black_square_counts[(i, j)] + 1 if (i, j) in black_square_counts \
-						else 1
-	offset = -min(black_squares, key=lambda y: y[1])[1]
-	black_squares = {(y[0], y[1] + offset) for y in black_squares}
-	x_size = max(black_squares, key=lambda z: z[0])[0] + 1  # TODO: adjust size and redo if x_size and y_size are close but wrong?
-	y_size = max(black_squares, key=lambda z: z[1])[1] + 1
+	for i in range(y_size):
+		y = full_lines[i]+1
+		for d in ranges[y]:
+			print(d, (round((d[0]-left)/guess), round((d[1]-left)/guess)))
+			for j in range(round((d[0] - left) / guess), round((d[1] - left) / guess)):
+				black_squares.add((i, j))
+	x_size = max(black_squares, key=lambda z: z[0])[0] + 1  # TODO: adjust size and redo if sizes are close but wrong?
+	# y_size = max(black_squares, key=lambda z: z[1])[1] + 1
 
 	print(x_size, y_size)
 	print(black_squares)

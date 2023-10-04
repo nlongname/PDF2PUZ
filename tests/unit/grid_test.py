@@ -7,7 +7,7 @@ class GridTest(TestCase):
         file_list = os.listdir(os.getcwd())
         test_pdfs = ["Dictionary_2022-06-10", "NYT_1997-03-01", "Arkadium_2023-08-09", "L. A. Times, Tue, Jan 3, 2023",
                      "Puzzle WK4_2022-Ross"]  # , "NYT_SuperMegaCrossword_22"]
-        dpis = [50, 100, 200]
+        dpis = [100, 200, 50]
         test_files = []
         for dpi in dpis:
             for filename in test_pdfs:
