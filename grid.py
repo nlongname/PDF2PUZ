@@ -1,6 +1,6 @@
 import numpy as np
 from pdf2image import convert_from_path
-from PIL import Image
+from PIL import Image, ImageDraw
 import pprint as pp
 from math import sqrt
 
@@ -15,8 +15,7 @@ def grid_from_pdf(filename, gridsize=(15, 15)):
 		filename = filename[:-4]
 	dpi = 200
 	pic = convert_from_path(filename, dpi=dpi, fmt="png")[0]  # hopefully PNG will be more consistent than JPG
-	# TODO: dynamically change DPI. 200 works the best (but breaks on supermega),
-	#  50 is way faster but leaves artifacts (DICT, for example)
+	# TODO: dynamically change DPI? 40-50 works perfectly on regular ones but is too much for supermega
 	pic.save(f"{filename}.png", 'PNG')
 	# OCR for clues
 	#        outfile = f"{name}.txt"
@@ -27,8 +26,8 @@ def grid_from_pdf(filename, gridsize=(15, 15)):
 	return grid_from_pic(f"{filename}.png", gridsize, dpi)
 
 
-def grid_from_pic(filename, gridsize=(15, 15), dpi=200):
-	# TODO: debug/refactor  this split when I can actually use pdf2image
+def grid_from_pic(filename, gridsize=(15, 15), dpi=40):
+	# TODO: turn this into a wrapper function so it can work from a PDF without saving an image
 
 	pic = Image.open(filename)
 	pixel_array = np.array([[luminance(p) for p in q] for q in np.array(pic)])
@@ -38,7 +37,7 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=200):
 	test_array = np.array([[[255, 255, 255] if p > luminance_cutoff else [0, 0, 0] for p in q]
 						   for q in pixel_array], dtype='uint8')
 	test_image = Image.fromarray(test_array)
-	test_image.show()
+	# test_image.show()
 
 	black = set()
 	a = round(5*sqrt(dpi/50))  # TODO: make a more descriptive name and make it parametric
@@ -57,7 +56,7 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=200):
 					ranges[y].append((x - streak, x - 1))
 				streak = 0
 	ranges = {r: ranges[r] for r in ranges if ranges[r] != []}
-	print(ranges)
+	# print(ranges)
 
 	# process coordinates to try to find grid
 
@@ -73,18 +72,18 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=200):
 					v = abs(i[1] - j[1])
 					widths[u] = widths[u] + 1 if u in widths else 1
 					widths[v] = widths[v] + 1 if v in widths else 1
-	print(widths)
+	# print(widths)
 	cutoff = sum(widths.values()) / 100
 	widths = {y: widths[y] for y in widths if widths[y] > cutoff}  # eliminate outliers
-	best = [w for w in widths if widths[w] == max(widths.values())]
+	# best = [w for w in widths if widths[w] == max(widths.values())]
 	widths = sorted(widths.keys())
-	print(widths)
-	print(pic.size, dpi, gridsize)
+	# print(widths)
+	# print(pic.size, dpi, gridsize)
 
-	#guess = sum(best)/len(best)
+	# guess = sum(best)/len(best)
 
 	guess = round(.5 * (pic.size[1] / 3 / gridsize[1] + pic.size[0] / 2.3 / gridsize[0]))
-	print(guess)
+	# print(guess)
 	# guess = min([widths[i + 1] - widths[i] for i in range(len(widths) - 1) if
 	#              widths[i + 1] - widths[i] > 2 * a])  # not sure about this 2*a
 	boxes = {}
@@ -106,7 +105,7 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=200):
 		else:
 			temp = [sum(boxes[y]) / len(boxes[y]) / y for y in boxes.keys()]
 			guess = sum(temp) / len(temp)
-			print(guess)
+			# print(guess)
 			if guess != previous_guess:
 				previous_guess = guess
 			else:
@@ -115,7 +114,7 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=200):
 			i = 0
 			working = True
 	ranges = {y: ranges[y] for y in ranges if ranges[y] != []}
-	print(ranges)
+	# print(ranges)
 	for r in ranges:
 		temp = []
 		for d in ranges[r]:
@@ -138,29 +137,55 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=200):
 					to_keep.append(past_y)
 			streak = 0
 	ranges = {k: v for k, v in ranges.items() if k in to_keep}
-	print(ranges)
+	# print(ranges)
 
 	# the .5's are to get the centers of the squares
-	left = min(ranges)
-	baseline = ranges[round(left + guess * .5)][0][0]  # this will break if there's a bogie on the left side
+	left = min(ranges.values())[0][0]
+	right = max(ranges.values(), key=lambda r: r[-1][-1])[-1][-1]
+	full_lines = [k for k in ranges if ranges[k] == [(left, right)]]
+	ranges = {k: ranges[k] for k in ranges if k not in full_lines}
+	# print(ranges)
+	baseline = ranges[round(min(ranges.keys()) + guess * .5)][0][0]  # this will break if there's a bogie on the left side
 	black_squares = set()
 	black_square_counts = {}
-	for i in range(round((max(ranges) - left) / guess)):
-		y = round(left + guess * (i + .5))
+	draw = ImageDraw.Draw(test_image)
+	top = min(ranges)
+	bottom = max(ranges)
+
+	# check square size against givens, and up date if necessary
+	both = False
+	# print(bottom, top, left, right, gridsize, guess)
+	if (guess-(bottom-top)/gridsize[1])/guess < .05:
+		guess = (bottom-top)/gridsize[1]
+		# print(f'new guess is {guess}')
+		both = True
+	if (guess-(right-left)/gridsize[0])/guess < .05:
+		if both:
+			guess = (guess + (right-left)/gridsize[0])/2
+		else:
+			guess = (right-left)/gridsize[0]
+		# print(f'new guess is {guess}')
+
+	for i in range(round((max(ranges) - top) / guess) + 1):
+		y = round(top + guess * (i + .5))
+		# print(y, ranges[y])
 		if y in ranges:
 			for d in ranges[y]:
-				print(d, (round((d[0]-baseline)/guess), round((d[1]-baseline)/guess)))
+				# print(y, d, (round((d[0]-baseline)/guess), round((d[1]-baseline)/guess)))
+				draw.line([(d[0], y), (d[1], y)], fill='red', width=1)
 				for j in range(round((d[0] - baseline) / guess), round((d[1] - baseline) / guess)):
 					black_squares.add((i, j))
 					black_square_counts[(i, j)] = black_square_counts[(i, j)] + 1 if (i, j) in black_square_counts \
 						else 1
+	test_image.show()
 	offset = -min(black_squares, key=lambda y: y[1])[1]
 	black_squares = {(y[0], y[1] + offset) for y in black_squares}
-	x_size = max(black_squares, key=lambda z: z[0])[0] + 1  # TODO: adjust size and redo if x_size and y_size are close but wrong?
+	x_size = max(black_squares, key=lambda z: z[0])[0] + 1
+	# TODO: adjust size and redo if x_size and y_size are close but wrong?
 	y_size = max(black_squares, key=lambda z: z[1])[1] + 1
 
-	print(x_size, y_size)
-	print(black_squares)
+	# print(x_size, y_size)
+	# print(black_squares)
 	# TODO: clean this up, really shouldn't need to transpose at all
 	template = ['X' * x_size for _ in range(y_size)]
 	for bs in black_squares:

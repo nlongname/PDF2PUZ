@@ -6,11 +6,11 @@ class GridTest(TestCase):
     def test_grid_from_pic(self):
         file_list = os.listdir(os.getcwd())
         test_pdfs = ["Dictionary_2022-06-10", "NYT_1997-03-01", "Arkadium_2023-08-09", "L. A. Times, Tue, Jan 3, 2023",
-                     "Puzzle WK4_2022-Ross"]  # , "NYT_SuperMegaCrossword_22"]
-        dpis = [50, 100, 200]
+                     "Puzzle WK4_2022-Ross", "NYT_Oct0123"] # TODO: Make this work on 21x21, not just 15x15
+        dpis = [50] # [50, 100, 200]
         test_files = []
-        for dpi in dpis:
-            for filename in test_pdfs:
+        for filename in test_pdfs:
+            for dpi in dpis:
                 if filename + f"_{dpi}.png" not in file_list:
                     pic = convert_from_path(f"{filename}.pdf", dpi=dpi, fmt="png")[0]
                     print(dpi, filename)
@@ -31,47 +31,6 @@ class GridTest(TestCase):
                                                       'XXXX.XXXX.XXXXX',
                                                       'XXXX.XXXX.XXXXX',
                                                       'XXXX.XXXX.XXXXX'],
-                    "NYT_SuperMegaCrossword_22": ['XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX..XXXXX.XXXXXXXXX.XXXXXXXXX',
-                                                  'XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXXX.XXXXXXXXX',
-                                                  'XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXXX.XXXXXXXXX',
-                                                  'XXXXX.XXXX.XXXXX.XXX.XXXXXXX.XXXXXXXXXXXXXXXXXX.XXXXXXXXXXX.XXXXXXX',
-                                                  '.XXX....XXXX..XXXXXXX.XXXXXXX....XXXXX..XXXX..XXXXXX..XXXXX...XXX..',
-                                                  '..XXX.XXXXXXXXXXX.XXXX.XXXX.XXXXXXXXX.XXXXX.XXXXX.XXXX.XXXXXXXXXXXX',
-                                                  'XXX.XXXX.XXXXX.XXXXXXXXXX..XXXXXXXX..XXXX.XXXXXX.XXXXXX.XXXXXX..XXX',
-                                                  'XXX.XXXXX..XXXX.XXXXXXX.XXXXXXXXXX.XXXXXXX.XXXXXXX.XXXXXXXXXXXX.XXX',
-                                                  'XXXXXXXXXXX.XXXX.XXX.XXX.XXX.XXXX.XXXXXX.XXXXX.XXXX..XXXXXXXX.XXXXX',
-                                                  'XXXXX.XXXXX...XXXXX.XXXXXXXXX.....XXXX.XXXXXXX.XXXXXXXXX.XXX.XXXXXX',
-                                                  'XXXXXX.XXXX.XXXXX..XXXXXXXX.XXXXXXX.XXXXX.XXXXX.XXXXXXX...XXXXXXXXX',
-                                                  'XXXXXXX.XXXXXXXXXXXXXX.XXXX.XXXXXXX.XXXXXX.XXXXX.XXXX.XXXX.XXXXX...',
-                                                  '...XXXXX.XXXXXX.XXXXX.XXXXX.XXXXXXXXXXX.XXXXXXXXX.XXXX.XXXXXX.XXXXX',
-                                                  'XXX.XXXXX.XXX.XXXXXX.XXXXXXX.XXXXX.XXXXX.XXXXX.XXX.XXX.XXXXXXX.XXXX',
-                                                  'XXXXXXXXXXXX.XXXXXX.XXXXX.XXXXXXXXXXX.XXXXXX..XXXX.XXXX.XXXXXXX.XXX',
-                                                  'XXXXX.XXXXX.XXXXX.XXXXXX.XXXXXXX.XXX.XXXXXX.XXXXXXXXXXXX.XXX.XXXXXX',
-                                                  'XXXX.XXXXX.XXXXXX..XXXX.XXXXXXXX..XXXXXXXX.XXXX..XXXX.XXXX.XXXXXXXX',
-                                                  'XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXX.XXXXXXXXX.XXXXXXXXX.XXXXX.XXXXXXXX.',
-                                                  '...XXX.XXXXXXXX.XXXXX.XXXXXXXX.XXXXXXXXX.XXXXXXXXX.XXXXXX.XXXX..XXX',
-                                                  'XXXXX.XXXXXXX.XXXXXX.XXXXXXXX.XXXX.XXXX.XXXXXXXXX.XXXXX.XXXXX.XXXXX',
-                                                  'XXXXX.XXXXXX.XXXXXX.XXX.XXXX.XXXXXXXXX.XXXX.XXX.XXXXXX.XXXXXX.XXXXX',
-                                                  'XXXXX.XXXXX.XXXXX.XXXXXXXXX.XXXX.XXXX.XXXXXXXX.XXXXXX.XXXXXXX.XXXXX',
-                                                  'XXX..XXXX.XXXXXX.XXXXXXXXX.XXXXXXXXX.XXXXXXXX.XXXXX.XXXXXXXX.XXX...',
-                                                  '.XXXXXXXX.XXXXX.XXXXXXXXX.XXXXXXXXX.XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXX',
-                                                  'XXXXXXXX.XXXX.XXXX..XXXX.XXXXXXXX..XXXXXXXX.XXXX..XXXXXX.XXXXX.XXXX',
-                                                  'XXXXXX.XXX.XXXXXXXXXXXX.XXXXXX.XXX.XXXXXXX.XXXXXX.XXXXX.XXXXX.XXXXX',
-                                                  'XXX.XXXXXXX.XXXX.XXXX..XXXXXX.XXXXXXXXXXX.XXXXX.XXXXXX.XXXXXXXXXXXX',
-                                                  'XXXX.XXXXXXX.XXX.XXX.XXXXX.XXXXX.XXXXX.XXXXXXX.XXXXXX.XXX.XXXXX.XXX',
-                                                  'XXXXX.XXXXXX.XXXX.XXXXXXXXX.XXXXXXXXXXX.XXXXX.XXXXX.XXXXXX.XXXXX...',
-                                                  '...XXXXX.XXXX.XXXX.XXXXX.XXXXXX.XXXXXXX.XXXX.XXXXXXXXXXXXXX.XXXXXXX',
-                                                  'XXXXXXXXX...XXXXXXX.XXXXX.XXXXX.XXXXXXX.XXXXXXXX..XXXXX.XXXX.XXXXXX',
-                                                  'XXXXXX.XXX.XXXXXXXXX.XXXXXXX.XXXX.....XXXXXXXXX.XXXXX...XXXXX.XXXXX',
-                                                  'XXXXX.XXXXXXXX..XXXX.XXXXX.XXXXXX.XXXX.XXX.XXX.XXX.XXXX.XXXXXXXXXXX',
-                                                  'XXX.XXXXXXXXXXXX.XXXXXXX.XXXXXXX.XXXXXXXXXX.XXXXXXX.XXXX..XXXXX.XXX',
-                                                  'XXX..XXXXXX.XXXXXX.XXXXXX.XXXX..XXXXXXXX..XXXXXXXXXX.XXXXX.XXXX.XXX',
-                                                  'X.XXXXXXXXXX.XXXX.XXXXX.XXXXX.XXXXXXXXX.XXXX.XXXX.XXXXXXXXXXX.XXX..',
-                                                  '..XXX...XXXXX..XXXXXX..XXXX..XXXXX....XXXXXXX.XXXXXXX..XXXX....XXX.',
-                                                  'XXXXXXX.XXXXXXXXXXX.XXXXXXXXXXXXXXXXXX.XXXXXXX.XXX.XXXXX.XXXX.XXXXX',
-                                                  'XXXXXXXXX.XXXXXXXXX.XXXXXX.XXXXXX.XXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXXX',
-                                                  'XXXXXXXXX.XXXXXXXXX.XXXXXX.XXXXXX.XXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXXX',
-                                                  'XXXXXXXXX.XXXXXXXXX.XXXXX..XXXXXX.XXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXXX'],
                     'Dictionary_2022-06-10': ['XXXX.XXXXX.XXX.',
                                               'XXXX.XXXXX.XXXX',
                                               'XXXX.XXXXXXXXXX',
@@ -131,7 +90,28 @@ class GridTest(TestCase):
                                        'XXXXX..XXXX.XXX',
                                        'XXXX.XXXX.XXXXX',
                                        'XXXX.XXXX.XXXXX',
-                                       'XXX..XXXX.XXXXX']
+                                       'XXX..XXXX.XXXXX'],
+                    'NYT_Oct0123': ['XXXXXX..XXXXXX.XXXXX.',
+                                    'XXXXXXX.XXXXXX.XXXXXX',
+                                    'XXXXXXXXXXXXXX.XXXXXX',
+                                    '....XXXX....XXXXXXXXX',
+                                    'XXXXX..XXXXX..XXX.XXX',
+                                    'XXXX.XXXXXXXXXXXXXXXX',
+                                    'XXXXXXX.XXXXXXX.XXX..',
+                                    'XXXXXXXXXXX.XXX..XXXX',
+                                    'XXXXX..XXX.XXXXXXXXXX',
+                                    'XXXXXXXX..XXX.XXX.XXX',
+                                    '...XXXXXXXXXXXXXXX...',
+                                    'XXX.XXX.XXX..XXXXXXXX',
+                                    'XXXXXXXXXX.XXX..XXXXX',
+                                    'XXXX..XXX.XXXXXXXXXXX',
+                                    '..XXX.XXXXXXX.XXXXXXX',
+                                    'XXXXXXXXXXXXXXXX.XXXX',
+                                    'XXX.XXX..XXXXX..XXXXX',
+                                    'XXXXXXXXX....XXXX....',
+                                    'XXXXXX.XXXXXXXXXXXXXX',
+                                    'XXXXXX.XXXXXX.XXXXXXX',
+                                    '.XXXXX.XXXXXX..XXXXXX']
                     }
         for file in test_files:
             dpi, filename = file
@@ -139,6 +119,65 @@ class GridTest(TestCase):
             test_grid = grid_from_pic(f"{filename}_{dpi}.png", dpi=dpi)
             self.assertEqual(expected[filename], test_grid)
 
+
+    def test_grid_from_mega(self):
+        file_list = os.listdir(os.getcwd())
+        test_pdfs = ["NYT_SuperMegaCrossword_22"]
+        dpis = [40]  # [10, 20, 30, 40] 40 is consistent for regular puzzles, but hopefully we can go lower
+        test_files = []
+        for filename in test_pdfs:
+            for dpi in dpis:
+                if filename + f"_{dpi}.png" not in file_list:
+                    pic = convert_from_path(f"{filename}.pdf", dpi=dpi, fmt="png")[0]
+                    print(dpi, filename)
+                    pic.save(f"{filename}_{dpi}.png", 'PNG')
+                test_files.append((dpi, filename))
+        expected = {"NYT_SuperMegaCrossword_22": ['XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX..XXXXX.XXXXXXXXX.XXXXXXXXX',
+                                                  'XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXXX.XXXXXXXXX',
+                                                  'XXXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXXX.XXXXXXXXX',
+                                                  'XXXXX.XXXX.XXXXX.XXX.XXXXXXX.XXXXXXXXXXXXXXXXXX.XXXXXXXXXXX.XXXXXXX',
+                                                  '.XXX....XXXX..XXXXXXX.XXXXXXX....XXXXX..XXXX..XXXXXX..XXXXX...XXX..',
+                                                  '..XXX.XXXXXXXXXXX.XXXX.XXXX.XXXXXXXXX.XXXXX.XXXXX.XXXX.XXXXXXXXXXXX',
+                                                  'XXX.XXXX.XXXXX.XXXXXXXXXX..XXXXXXXX..XXXX.XXXXXX.XXXXXX.XXXXXX..XXX',
+                                                  'XXX.XXXXX..XXXX.XXXXXXX.XXXXXXXXXX.XXXXXXX.XXXXXXX.XXXXXXXXXXXX.XXX',
+                                                  'XXXXXXXXXXX.XXXX.XXX.XXX.XXX.XXXX.XXXXXX.XXXXX.XXXX..XXXXXXXX.XXXXX',
+                                                  'XXXXX.XXXXX...XXXXX.XXXXXXXXX.....XXXX.XXXXXXX.XXXXXXXXX.XXX.XXXXXX',
+                                                  'XXXXXX.XXXX.XXXXX..XXXXXXXX.XXXXXXX.XXXXX.XXXXX.XXXXXXX...XXXXXXXXX',
+                                                  'XXXXXXX.XXXXXXXXXXXXXX.XXXX.XXXXXXX.XXXXXX.XXXXX.XXXX.XXXX.XXXXX...',
+                                                  '...XXXXX.XXXXXX.XXXXX.XXXXX.XXXXXXXXXXX.XXXXXXXXX.XXXX.XXXXXX.XXXXX',
+                                                  'XXX.XXXXX.XXX.XXXXXX.XXXXXXX.XXXXX.XXXXX.XXXXX.XXX.XXX.XXXXXXX.XXXX',
+                                                  'XXXXXXXXXXXX.XXXXXX.XXXXX.XXXXXXXXXXX.XXXXXX..XXXX.XXXX.XXXXXXX.XXX',
+                                                  'XXXXX.XXXXX.XXXXX.XXXXXX.XXXXXXX.XXX.XXXXXX.XXXXXXXXXXXX.XXX.XXXXXX',
+                                                  'XXXX.XXXXX.XXXXXX..XXXX.XXXXXXXX..XXXXXXXX.XXXX..XXXX.XXXX.XXXXXXXX',
+                                                  'XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXX.XXXXXXXXX.XXXXXXXXX.XXXXX.XXXXXXXX.',
+                                                  '...XXX.XXXXXXXX.XXXXX.XXXXXXXX.XXXXXXXXX.XXXXXXXXX.XXXXXX.XXXX..XXX',
+                                                  'XXXXX.XXXXXXX.XXXXXX.XXXXXXXX.XXXX.XXXX.XXXXXXXXX.XXXXX.XXXXX.XXXXX',
+                                                  'XXXXX.XXXXXX.XXXXXX.XXX.XXXX.XXXXXXXXX.XXXX.XXX.XXXXXX.XXXXXX.XXXXX',
+                                                  'XXXXX.XXXXX.XXXXX.XXXXXXXXX.XXXX.XXXX.XXXXXXXX.XXXXXX.XXXXXXX.XXXXX',
+                                                  'XXX..XXXX.XXXXXX.XXXXXXXXX.XXXXXXXXX.XXXXXXXX.XXXXX.XXXXXXXX.XXX...',
+                                                  '.XXXXXXXX.XXXXX.XXXXXXXXX.XXXXXXXXX.XXXXXXXX.XXXXXX.XXXXXX.XXXXXXXX',
+                                                  'XXXXXXXX.XXXX.XXXX..XXXX.XXXXXXXX..XXXXXXXX.XXXX..XXXXXX.XXXXX.XXXX',
+                                                  'XXXXXX.XXX.XXXXXXXXXXXX.XXXXXX.XXX.XXXXXXX.XXXXXX.XXXXX.XXXXX.XXXXX',
+                                                  'XXX.XXXXXXX.XXXX.XXXX..XXXXXX.XXXXXXXXXXX.XXXXX.XXXXXX.XXXXXXXXXXXX',
+                                                  'XXXX.XXXXXXX.XXX.XXX.XXXXX.XXXXX.XXXXX.XXXXXXX.XXXXXX.XXX.XXXXX.XXX',
+                                                  'XXXXX.XXXXXX.XXXX.XXXXXXXXX.XXXXXXXXXXX.XXXXX.XXXXX.XXXXXX.XXXXX...',
+                                                  '...XXXXX.XXXX.XXXX.XXXXX.XXXXXX.XXXXXXX.XXXX.XXXXXXXXXXXXXX.XXXXXXX',
+                                                  'XXXXXXXXX...XXXXXXX.XXXXX.XXXXX.XXXXXXX.XXXXXXXX..XXXXX.XXXX.XXXXXX',
+                                                  'XXXXXX.XXX.XXXXXXXXX.XXXXXXX.XXXX.....XXXXXXXXX.XXXXX...XXXXX.XXXXX',
+                                                  'XXXXX.XXXXXXXX..XXXX.XXXXX.XXXXXX.XXXX.XXX.XXX.XXX.XXXX.XXXXXXXXXXX',
+                                                  'XXX.XXXXXXXXXXXX.XXXXXXX.XXXXXXX.XXXXXXXXXX.XXXXXXX.XXXX..XXXXX.XXX',
+                                                  'XXX..XXXXXX.XXXXXX.XXXXXX.XXXX..XXXXXXXX..XXXXXXXXXX.XXXXX.XXXX.XXX',
+                                                  'X.XXXXXXXXXX.XXXX.XXXXX.XXXXX.XXXXXXXXX.XXXX.XXXX.XXXXXXXXXXX.XXX..',
+                                                  '..XXX...XXXXX..XXXXXX..XXXX..XXXXX....XXXXXXX.XXXXXXX..XXXX....XXX.',
+                                                  'XXXXXXX.XXXXXXXXXXX.XXXXXXXXXXXXXXXXXX.XXXXXXX.XXX.XXXXX.XXXX.XXXXX',
+                                                  'XXXXXXXXX.XXXXXXXXX.XXXXXX.XXXXXX.XXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXXX',
+                                                  'XXXXXXXXX.XXXXXXXXX.XXXXXX.XXXXXX.XXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXXX',
+                                                  'XXXXXXXXX.XXXXXXXXX.XXXXX..XXXXXX.XXXXXXXX.XXXXXXXXXXXXXX.XXXXXXXXX']}
+        for file in test_files:
+            dpi, filename = file
+            print(dpi, filename)
+            test_grid = grid_from_pic(f"{filename}_{dpi}.png", gridsize=(67, 41), dpi=dpi)
+            self.assertEqual(expected[filename], test_grid)
 
     def test_clue_numbers(self):
         # L.A. Times, Tue, Jan 3, 2023
