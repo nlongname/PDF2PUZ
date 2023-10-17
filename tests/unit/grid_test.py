@@ -6,8 +6,10 @@ class GridTest(TestCase):
     def test_grid_from_pic(self):
         file_list = os.listdir(os.getcwd())
         test_pdfs = ["Dictionary_2022-06-10", "NYT_1997-03-01", "Arkadium_2023-08-09", "L. A. Times, Tue, Jan 3, 2023",
-                     "Puzzle WK4_2022-Ross", "NYT_Oct0123"] # TODO: Make this work on 21x21, not just 15x15
-        dpis = [50] # [50, 100, 200]
+                     "Puzzle WK4_2022-Ross", "NYT_Oct0123"] # TODO: Make sure this works consistently on 21x21
+        dpis = [40] # [50, 100, 200]
+        sizes = {filename:(15, 15) for filename in test_pdfs}
+        sizes["NYT_Oct0123"] = (21, 21)
         test_files = []
         for filename in test_pdfs:
             for dpi in dpis:
@@ -123,7 +125,7 @@ class GridTest(TestCase):
     def test_grid_from_mega(self):
         file_list = os.listdir(os.getcwd())
         test_pdfs = ["NYT_SuperMegaCrossword_22"]
-        dpis = [40]  # [10, 20, 30, 40] 40 is consistent for regular puzzles, but hopefully we can go lower
+        dpis = [10]  # [10, 20, 30, 40] 40 is consistent for regular puzzles, but hopefully we can go lower
         test_files = []
         for filename in test_pdfs:
             for dpi in dpis:
@@ -176,7 +178,7 @@ class GridTest(TestCase):
         for file in test_files:
             dpi, filename = file
             print(dpi, filename)
-            test_grid = grid_from_pic(f"{filename}_{dpi}.png", gridsize=(67, 41), dpi=dpi)
+            test_grid = grid_from_pic(f"{filename}_{dpi}.png", gridsize=(41, 67), dpi=dpi)
             self.assertEqual(expected[filename], test_grid)
 
     def test_clue_numbers(self):

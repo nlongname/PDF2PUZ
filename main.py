@@ -21,7 +21,7 @@ def find_pdfs(filepath=None):
     return pdfs  # for now I won't include the folder, but I might need to
 
 
-def write_to_txt(name, grid):
+def grid_to_txt(name, grid):
     x_size = len(grid[0])
     y_size = len(grid)
     clue_numbers = get_clue_numbers(grid)

@@ -16,7 +16,7 @@ def read(filename: str):
 	# what if I didn't do this, and used the line break as an indicator when there are duplicate numbers?
 
 
-def extract_clues(raw: str, clues: dict):
+def extract_clues(raw: str, clues: dict, across_first = False):
 	#print(raw)
 	indices = [None]
 	num = 1
@@ -47,7 +47,8 @@ def extract_clues(raw: str, clues: dict):
 	# we have everything needed to make the set (excluding things accounted for)
 	# then start from the last one we needed and go backwards to exclude
 	# extra stuff at the beginning
-	for name in ['down', 'across']:
+	directions = ['across', 'down'] if 'across_first' else ['down', 'across']
+	for name in directions:
 		cumulative_list = []
 		cumulative_set = set()
 		target_set = set(clues[name])
@@ -57,8 +58,10 @@ def extract_clues(raw: str, clues: dict):
 			cumulative_set.update([s[0] for s in streaks[i]])
 			i += 1
 		if i == len(streaks):
-			#raise Exception("target set not found")
-			return None
+			if across_first: # indicates this is a second pass
+				return None
+			else:
+				return extract_clues(raw, clues, True)
 		max_index = i
 		i -= 1
 		cumulative_set = set()
@@ -104,7 +107,7 @@ def extract_clues(raw: str, clues: dict):
 				cumulative_list = [pair for pair in cumulative_list if pair[1] not in bogies]
 		# TODO: make some kind of final safeguard, if nothing else works just take a guess?
 		# maybe use the average clue length to see which clue lengths make more sense
-		streaks[min_index:max_index] = [cumulative_list]
+		# streaks[min_index:max_index] = [cumulative_list]
 	
 	for i, s in enumerate(streaks):
 		temp_clues = [pair[0] for pair in s]
@@ -117,7 +120,10 @@ def extract_clues(raw: str, clues: dict):
 	try:
 		return {'down': down_clues, 'across': across_clues}
 	except UnboundLocalError:
-		return None
+		if across_first:  # indicates this is a second pass
+			return None
+		else:
+			return extract_clues(raw, clues, True)
 
 
 if __name__ == '__main__':

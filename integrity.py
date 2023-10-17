@@ -139,10 +139,11 @@ def find_offset(left_grid, right_grid, focus_left: bool):
                         best_grid = [''.join(line) for line in left_overlap]
                     else:
                         best_grid = [''.join(line) for line in right_overlap]
-    # This number is basically a guess, might want to adjust it
     # TODO: better way of determining area of overlap to eliminate bogies on all sides;
     #  maybe something recursive? knock off two sides then go back for the other two
     # print(accuracies)
+
+    # The following number is basically a guess, might want to adjust it
     if max_size > .25*left_grid.size:
         return best_grid
     else:

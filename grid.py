@@ -75,15 +75,15 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=40):
 	# print(widths)
 	cutoff = sum(widths.values()) / 100
 	widths = {y: widths[y] for y in widths if widths[y] > cutoff}  # eliminate outliers
-	# best = [w for w in widths if widths[w] == max(widths.values())]
+	best = [w for w in widths if widths[w] == max(widths.values())]
 	widths = sorted(widths.keys())
 	# print(widths)
 	# print(pic.size, dpi, gridsize)
 
 	# guess = sum(best)/len(best)
 
-	guess = round(.5 * (pic.size[1] / 3 / gridsize[1] + pic.size[0] / 2.3 / gridsize[0]))
-	# print(guess)
+	guess = round(.5 * (pic.size[1] / 3 / gridsize[1] + pic.size[0] / 2 / gridsize[0]))
+	# TODO: check whether I should just skip this and use the first width as the first guess
 	# guess = min([widths[i + 1] - widths[i] for i in range(len(widths) - 1) if
 	#              widths[i + 1] - widths[i] > 2 * a])  # not sure about this 2*a
 	boxes = {}
@@ -102,6 +102,8 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=40):
 		i += 1
 		if i == 1:
 			guess = widths[0] / round(widths[0] / guess)
+			if guess != previous_guess:
+				previous_guess = guess
 		else:
 			temp = [sum(boxes[y]) / len(boxes[y]) / y for y in boxes.keys()]
 			guess = sum(temp) / len(temp)
@@ -113,6 +115,7 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=40):
 		if not working:
 			i = 0
 			working = True
+	print(guess)
 	ranges = {y: ranges[y] for y in ranges if ranges[y] != []}
 	# print(ranges)
 	for r in ranges:
@@ -145,29 +148,27 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=40):
 	full_lines = [k for k in ranges if ranges[k] == [(left, right)]]
 	ranges = {k: ranges[k] for k in ranges if k not in full_lines}
 	# print(ranges)
-	baseline = ranges[round(min(ranges.keys()) + guess * .5)][0][0]  # this will break if there's a bogie on the left side
+	baseline = ranges[round(min(ranges.keys()) + guess * .5)][0][0]  # this may break if there's a bogie on the left side
 	black_squares = set()
 	black_square_counts = {}
 	draw = ImageDraw.Draw(test_image)
 	top = min(ranges)
 	bottom = max(ranges)
 
-	# check square size against givens, and up date if necessary
-	both = False
-	# print(bottom, top, left, right, gridsize, guess)
-	if (guess-(bottom-top)/gridsize[1])/guess < .05:
-		guess = (bottom-top)/gridsize[1]
-		# print(f'new guess is {guess}')
-		both = True
-	if (guess-(right-left)/gridsize[0])/guess < .05:
-		if both:
-			guess = (guess + (right-left)/gridsize[0])/2
-		else:
-			guess = (right-left)/gridsize[0]
-		# print(f'new guess is {guess}')
+	# check square size against common/given grid sizes, and update if necessary
+	sizes = [(15, 15), (21, 21)]
+	if gridsize and gridsize not in sizes:
+		sizes.append(gridsize)
+	errors = {} # percent errors for each size
+	for size in sizes:
+		errors[size] = (abs((guess-(bottom-top)/size[1])/guess), abs((guess-(right-left)/size[0])/guess))
+
+	if min(min(e) for e in errors.values()) < .1:
+		gridsize = min(sizes, key=lambda s: max(errors[s]))
+		guess = ((right - left) / gridsize[0] + (bottom - top) / gridsize[1]) / 2
 
 	for i in range(round((max(ranges) - top) / guess) + 1):
-		y = round(top + guess * (i + .5))
+		y = round(top + guess * (i + .25))
 		# print(y, ranges[y])
 		if y in ranges:
 			for d in ranges[y]:
@@ -181,7 +182,6 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=40):
 	offset = -min(black_squares, key=lambda y: y[1])[1]
 	black_squares = {(y[0], y[1] + offset) for y in black_squares}
 	x_size = max(black_squares, key=lambda z: z[0])[0] + 1
-	# TODO: adjust size and redo if x_size and y_size are close but wrong?
 	y_size = max(black_squares, key=lambda z: z[1])[1] + 1
 
 	# print(x_size, y_size)
@@ -190,7 +190,7 @@ def grid_from_pic(filename, gridsize=(15, 15), dpi=40):
 	template = ['X' * x_size for _ in range(y_size)]
 	for bs in black_squares:
 		template[bs[1]] = template[bs[1]][:bs[0]] + '.' + template[bs[1]][bs[0] + 1:]
-	pp.pprint(template)
+	# pp.pprint(template)
 
 	# words will be in the form '...XXX...XXX...XXX...', so every '.X' indicates a new word
 	# with an extra word if the first character is a letter rather than '.'
