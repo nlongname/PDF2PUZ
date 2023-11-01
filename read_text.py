@@ -29,7 +29,7 @@ def extract_clues(raw: str, clues: dict, across_first = False):
 	to_delete = []
 	for i in sorted(numbers_at.keys()):
 		if len(numbers_at[i]) > 1:
-			to_delete.append(i+1)  # e.g. we find 2 and 23 at an index? we're going to find 3 at the next index
+			to_delete.append(i+1)  # e.g. we find 2 and 23 at an index? we're going to find 3 at the next index TODO: check if this causes errors when clues end in a number, sometimes the space is missing
 			numbers_at[i] = [max(numbers_at[i])]  # and we want 23 not 2 here
 	numbers_at = {k: v[0] for k, v in numbers_at.items() if k not in to_delete}
 	indices = [(numbers_at[m], m) for m in sorted(numbers_at.keys())]
@@ -42,6 +42,7 @@ def extract_clues(raw: str, clues: dict, across_first = False):
 	streaks.append(indices[last_split:len(indices)])
 
 	streaks = [streak if len(streak) != streak[-1][0] else [streak[0], streak[-1]] for streak in streaks]
+	# TODO: maybe delete that line, I don't think it's doing anything useful
 
 	# concept: make a set starting at the beginning and adding up until
 	# we have everything needed to make the set (excluding things accounted for)
